@@ -1,0 +1,6 @@
+{
+	"getAll":"/get/all",
+	"getUser":"/get/user",
+	"sendBid":"/post/bid",
+	"sendAsk":"/post/ask"
+}

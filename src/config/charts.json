@@ -1,0 +1,35 @@
+{
+	"market":{
+    	"xAxis": {
+    		"show":false,
+        	"type": "category",
+        		"data": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+    	},
+    	"yAxis": {
+    		"show":false,
+        	"type": "value"
+    	},
+    	"grid":{
+    		"left":0,
+    		"right":0,
+    		"top":0,
+    		"bottom":0
+    	},
+    	"tooltip": {
+            "axisPointer": {
+                "type": "cross",
+                "animation": true,
+                "label": {
+                	"show":true
+                }
+            }
+        },
+    	"series": [{
+        	"data": [820, 932, 901, 934, 1290, 1330, 1320],
+        	"type": "line"
+    	},{
+    		"data": [840, 950, 870, 940, 1320, 1350, 1300],
+        	"type": "line"
+    	}]
+	}
+}
