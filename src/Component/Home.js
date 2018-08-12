@@ -30,7 +30,7 @@ class TabsCard extends Component {
   }
   render() {
     this.contents = {
-      Market: <Market marketData={this.props.marketData}/>,
+      Market: <Market/>,
       Dashboard: <Dashboard/>,
       User: <User/>,
     };
@@ -39,6 +39,7 @@ class TabsCard extends Component {
         <Card
           className="TabsCard"
           style={{ width: '100%',height:'100%'}}
+          headStyle={{}}
           bodyStyle={{padding:0,height:'100%'}}
           tabList={this.tabs}
           activeTabKey={this.state.active}

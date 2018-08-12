@@ -1,6 +1,8 @@
 {
 	"getAll":"/get/all",
 	"getUser":"/get/user",
+	"getLevelOne":"/get/levelone",
+	"getLevelTwo":"/get/leveltwo",
 	"sendBid":"/post/bid",
 	"sendAsk":"/post/ask"
 }

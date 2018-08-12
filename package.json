@@ -3,11 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "ant-design-pro": "^1.4.4",
     "antd": "^3.8.0",
     "axios": "^0.18.0",
     "echarts": "^4.1.0",
     "echarts-for-react": "^2.0.14",
     "mockjs": "^1.0.1-beta3",
+    "moment": "^2.22.2",
     "react": "^16.4.2",
     "react-dom": "^16.4.2",
     "react-scripts": "1.1.4"
