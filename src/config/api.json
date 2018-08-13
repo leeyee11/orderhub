@@ -1,8 +1,9 @@
 {
-	"getAll":"/get/all",
-	"getUser":"/get/user",
+	"getOrders":"/get/orders",
+	"getDashboard":"get/dashboard",
 	"getLevelOne":"/get/levelone",
 	"getLevelTwo":"/get/leveltwo",
-	"sendBid":"/post/bid",
-	"sendAsk":"/post/ask"
+	"postSignIn":"/post/signin",
+	"postBid":"/post/bid",
+	"postAsk":"/post/ask"
 }

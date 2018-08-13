@@ -1,19 +1,21 @@
 {
 	"market":{
     	"xAxis": {
-    		"show":false,
-        	"type": "category",
-        		"data": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+    		"show":true,
+        "type": "category",
+        "min":"dataMin",
+        "data": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
     	},
     	"yAxis": {
-    		"show":false,
-        	"type": "value"
+        "min":"dataMin",
+    		"show":true,
+        "type": "value"
     	},
     	"grid":{
-    		"left":0,
-    		"right":0,
-    		"top":0,
-    		"bottom":0
+       "left": "3%",
+       "right": "4%",
+       "bottom": "3%",
+       "containLabel": true
     	},
     	"tooltip": {
             "axisPointer": {

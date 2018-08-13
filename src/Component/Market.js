@@ -1,10 +1,11 @@
 import React, { Component } from 'react';
-import { Select,Table,Card,Row, Col,InputNumber,Layout,Menu,Tag} from 'antd';
+import { Select,Table,Card,Row, Col,InputNumber,Layout,Menu,Tag,Icon} from 'antd';
 import ReactEcharts from 'echarts-for-react';
 import options from '../config/charts.json';
 import axios from 'axios';
 import Mock from 'mockjs';
 import api from '../config/api.json'
+import './Market.css';
 
 const Option = Select.Option;
 const { Column } = Table;
@@ -12,28 +13,14 @@ const { Content,Sider } = Layout;
 
 const symbols=["AAPL","C","GS","BIDU","WMT","SNE","DDAIF","VLKAY","GE","TSLA"];
 
-Mock.mock(api.getAll, {
-  "bid|10-30":[
-    {
-      "key|+1":0,
-      "price|100-200.2":1,
-      "size|1-50":1,
-    }
-  ],
-  "ask|10-30":[
-    {
-      "key|+1":0,
-      "price|100-200.2":1,
-      "size|1-50":1,
-    }
-  ]
-});
 Mock.mock(api.getLevelOne,{
   "market|10":[
     {
       "symbol|+1":symbols,
-      "bid|100-200.2":1,
-      "ask|100-200.2":1
+      "bidQty|1-50":1,
+      "bidPrice|100-200.2":1,
+      "askPrice|100-200.2":1,
+      "askQty|1-50":1
     }
   ]
 });
@@ -42,15 +29,15 @@ Mock.mock(api.getLevelTwo, {
   "bid|10-30":[
     {
       "key|+1":0,
-      "price|100-200.2":1,
-      "size|1-50":1,
+      "bidPrice|100-200.2":1,
+      "bidQty|1-50":1,
     }
   ],
   "ask|10-30":[
     {
       "key|+1":0,
-      "price|100-200.2":1,
-      "size|1-50":1,
+      "askPrice|100-200.2":1,
+      "askQty|1-50":1,
     }
   ]
 });
@@ -62,9 +49,11 @@ class Market extends Component {
     this.state = {
       company:"AAPL",
       orderType:"MKT",
-      levelOne:{market:[]},
-      levelTwo:{bid:[],ask:[]},
-      interval:null
+      market:[],
+      bid:[],
+      ask:[],
+      interval:null,
+      collapse:true
     };
   }
   componentDidMount(){
@@ -77,8 +66,7 @@ class Market extends Component {
     //LevelOne
     axios.get(api.getLevelOne)
     .then((res)=>{
-      console.log(res.data)
-      this.setState({levelOne:res.data})
+      this.setState({market:res.data.market})
     })
     .catch((err)=>{
       console.log(err);
@@ -87,28 +75,44 @@ class Market extends Component {
     //LevelTwo
   axios.get(api.getLevelTwo)
     .then((res)=>{
-      this.setState({levelTwo:res.data})
+      this.setState({bid:res.data.bid})
+      this.setState({ask:res.data.ask})
     })
     .catch((err)=>{
       console.log(err);
     });
   }
-
+  collapse(){
+    this.setState({"collapse":!this.state.collapse})
+  }
   render() {
-    const MenuItems=this.state.levelOne.market.map(item=>{
+    const MenuItems=this.state.market.map(item=>{
       return (
-        <Menu.Item key={item.symbol}>
+        <Menu.Item key={item.symbol} style={{paddingLeft:0,paddingRight:0}}>
           <Row>
-            <Col span={8} align="left"><Tag color="#2db7f5">{item.symbol}</Tag></Col>
-            <Col span={8} align="left">{item.bid}</Col>
-            <Col span={8} align="left">{item.ask}</Col>
+            <Col span={this.state.collapse?24:6} align="left">{item.symbol}</Col>
+            <Col span={4} align="center" style={{display:this.state.collapse?'none':'inline-block'}}>{item.bidQty}</Col>
+            <Col span={5} align="center" style={{display:this.state.collapse?'none':'inline-block'}}>{item.bidPrice}</Col>
+            <Col span={5} align="center" style={{display:this.state.collapse?'none':'inline-block'}}>{item.askPrice}</Col>
+            <Col span={4} align="center" style={{display:this.state.collapse?'none':'inline-block'}}>{item.askQty}</Col>
           </Row>
         </Menu.Item>);
     })
     return (
-        <div className="Market" style={{height:'100%'}}>
-        <Layout style={{height:'100%'}}>
-          <Sider style={{minWidth:280}}>
+        <Layout className="Market" style={{height:'100%'}}>
+          <Sider width={this.state.collapse?100:360} style={{overflow:"hidden"}}>
+            <div style={{color:"#ffffff",height:'48px',lineHeight:'48px',paddingLeft:25,backgroundColor:'#234'}}>
+              <Row>
+                <Col span={this.state.collapse?24:6} align="left">
+                <a style={{color:'#ffffff'}} onClick={()=>this.collapse()}>
+                  <Icon type={this.state.collapse ? 'right' : 'left'} />
+                </a></Col>
+                <Col span={4} style={{display:this.state.collapse?'none':'inline-block'}} align="center">Bid Qty</Col>
+                <Col span={5} style={{display:this.state.collapse?'none':'inline-block'}} align="center">Bid Price</Col>
+                <Col span={5} style={{display:this.state.collapse?'none':'inline-block'}} align="center">Ask Price</Col>
+                <Col span={4} style={{display:this.state.collapse?'none':'inline-block'}} align="center">Bid Qty</Col>
+              </Row>
+            </div>
             <Menu
             className="SymbolMenu"
             onClick={this.handleClick}
@@ -123,108 +127,99 @@ class Market extends Component {
             </Menu>
           </Sider>
           <Content style={{height:'100%',padding:24}}>
-          <Card
-            bodyStyle={{padding:0}}>
-            <ReactEcharts
-                  ReactEcharts
-                  style={{width:'100%',height:120}}
-                  option={options.market}
-                  notMerge={true}
-                  lazyUpdate={true}
-                  theme={"theme_name"}
-                  onChartReady={this.onChartReadyCallback}
-                  onEvents={null}
-                  opts={null}/>
-          </Card>
-          <Row gutter={24} style={{marginTop:24}}>
-          <Col span={8} style={{height:560}}>
+          <Row gutter={24} style={{height:'100%'}}>
+          <Col span={12}>
             <Card bodyStyle={{paddingBottom:0}}>
+              <Row gutter={12}>
+                <Col span={12}>
                 <Table 
-                style={{height:500}}
-                pagination={{pageSize:9,simple:true}}
+                pagination={{pageSize:10,simple:true}}
                 size="middle" 
-                dataSource={this.state.levelTwo.bid} >
+                dataSource={this.state.bid} >
                   <Column
-                  title="BidSize"
-                  dataIndex="size"
-                  key="size"
+                  title="Bid Qty"
+                  dataIndex="bidQty"
+                  key="bidQty"
                   />
                   <Column
                   title="BidPrice"
-                  dataIndex="price"
-                  key="price"
+                  dataIndex="bidPrice"
+                  key="bidPrice"
                   />
                 </Table>
-              </Card>
-          </Col>
-          <Col span={8} style={{height:560}}>
-            <Card bodyStyle={{paddingBottom:0}}>
+                </Col>
+                <Col span={12}>
                 <Table 
-                style={{height:500}}
-                pagination={{pageSize:9,simple:true}}
+                pagination={{pageSize:10,simple:true}}
                 size="middle" 
-                dataSource={this.state.levelTwo.ask} >
+                dataSource={this.state.ask} >
                   <Column
-                  title="AskSize"
-                  dataIndex="size"
-                  key="size"
+                  title="Ask Price"
+                  dataIndex="askPrice"
+                  key="askPrice"
                   />
                   <Column
-                  title="AskPrice"
-                  dataIndex="price"
-                  key="price"
+                  title="Ask Qty"
+                  dataIndex="askQty"
+                  key="askQty"
                   />
                 </Table>
-              </Card>
-            </Col>
-            <Col span={8} style={{height:560}}>
-              <Card bodyStyle={{padding:0}}>
-                  <Card.Grid style={{width:'50%',height:100,fontSize:28}}>206.34</Card.Grid>
-                  <Card.Grid style={{width:'50%',height:100,fontSize:28}}>208.54</Card.Grid>
-                 <Card.Grid style={{width:'100%',height:270}}>
-                  <Select
-                  showSearch
-                  size="large"
+                </Col>
+              </Row>
+            </Card>
+          </Col>
+          <Col span={12}>
+            <Card bodyStyle={{padding:0}}>
+              <ReactEcharts
+              ReactEcharts
+              style={{width:'100%',height:230}}
+              option={options.market}
+              notMerge={true}
+              lazyUpdate={true}
+              theme={"theme_name"}
+              onChartReady={this.onChartReadyCallback}
+              onEvents={null}
+              opts={null}/>
+            </Card>
+            <Card style={{height:320,marginTop:24}}>
+              <Select
+              showSearch
+              size="large"
+              style={{ width: '100%' }}
+              onChange={(value)=>{this.setState({orderType:value})}}
+              defaultValue={this.state.orderType}>
+              <Option value="MKT">Market Order</Option>
+                <Option value="LMT">Limit Order</Option>
+                <Option value="STP">Stop Order</Option>
+                <Option value="STPL">Stop Loss Order</Option>
+                <Option value="STPLMT">Stop Limit Order</Option>
+                <Option value="MIT">Market If Touched</Option>
+                <Option value="LIT">Limit If Touched</Option>
+              </Select>
+              <br/>
+              <br/>
+              <Row gutter={24}>
+                <Col span={12}>
+                  <InputNumber
                   style={{ width: '100%' }}
-                  onChange={(value)=>{this.setState({orderType:value})}}
-                  defaultValue={this.state.orderType}
-                  >
-                    <Option value="MKT">Market Order</Option>
-                    <Option value="LMT">Limit Order</Option>
-                    <Option value="STP">Stop Order</Option>
-                    <Option value="STPL">Stop Loss Order</Option>
-                    <Option value="STPLMT">Stop Limit Order</Option>
-                    <Option value="MIT">Market If Touched</Option>
-                    <Option value="LIT">Limit If Touched</Option>
-                  </Select>
-                  <br/>
-                  <br/>
-                  <Row gutter={24}>
-                    <Col span={12}>
-                      <InputNumber
-                      style={{ width: '100%' }}
-                      defaultValue={1000}
-                      formatter={value => `$ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-                      parser={value => value.replace(/\$\s?|(,*)/g, '')}
-                    />
-                    </Col>
-                    <Col span={12}>
-                      <InputNumber
-                      style={{ width: '100%' }}
-                      defaultValue={1000}
-                      formatter={value => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-                      />
-                    </Col>
-                  </Row>
-                 </Card.Grid>
-                </Card>
-            </Col>
-            </Row>
+                  defaultValue={1000}
+                  formatter={value => `$ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                  parser={value => value.replace(/\$\s?|(,*)/g, '')}
+                />
+                </Col>
+                <Col span={12}>
+                  <InputNumber
+                  style={{ width: '100%' }}
+                  defaultValue={1000}
+                  formatter={value => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                  />
+                </Col>
+              </Row>
+            </Card>
+          </Col>
+          </Row>
           </Content>
-          </Layout>
-
-          
-        </div>
+          </Layout>    
     );
   }
 }

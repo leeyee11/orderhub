@@ -7,8 +7,8 @@ import { Card } from 'antd';
 import './App.css';
 
 class App extends Component {
-  constructor(){
-  	super();
+  constructor(props){
+  	super(props);
   	this.state={
   		username:null,
   	}
@@ -17,7 +17,7 @@ class App extends Component {
   render() {
     return (
       <div className="App">
-        <Home/>
+        <Home store={this.props.store}/>
       </div>
     );
   }

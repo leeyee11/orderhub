@@ -42,9 +42,8 @@ class DashBoard extends Component {
   }
   render() {
     return (
-        <div className="DashBoard" style={{height:'100%'}}>
-          <Layout style={{height:'100%'}}>
-            <Content style={{height:'100%',padding:24}}>
+        <Layout className="DashBoard" style={{height:'100%',overflow:'auto'}}>
+            <Content style={{padding:24}}>
             <Row gutter={24}>
               <Col span={6}>
                 <ChartCard style={{height:180}} title="Bid" align="left"
@@ -122,16 +121,15 @@ class DashBoard extends Component {
                 </Card>
               </Col>
               <Col span={12}>
-                <Card bodyStyle={{height:250,padding:0}}>
+                <Card bodyStyle={{height:230,padding:0}}>
                   <TagCloud
                   data={tags}
-                  height={250}/>
+                  height={230}/>
                 </Card>
               </Col>
             </Row>
             </Content>
-          </Layout>
-        </div>
+        </Layout>
     );
   }
 }
