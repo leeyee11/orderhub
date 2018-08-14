@@ -11,23 +11,23 @@ const FormItem = Form.Item;
 
 const symbols=["AAPL","C","GS","BIDU","WMT","SNE","DDAIF","VLKAY","GE","TSLA"];
 
-Mock.mock(api.postSignIn,{
-  "hash":md5("admin"+"12345")
-});
+// Mock.mock(api.postSignIn,{
+//   "hash":md5("admin"+"12345")
+// });
 
-Mock.mock(api.getOrders+"?hash="+md5("admin"+"12345"),{
-  "orders|20-50":[
-    {
-      "key|+1":1,
-      "symbol|1":symbols,
-      "type|1":["Buy","Sell"],
-      "price|100-200.2":1,
-      "quantity|1-50":1,
-      "status|1":["Processing","Canceled","Completed"],
-      "datetime":"@date('yyyy-MM-dd')"
-    }
-  ]
-});
+// Mock.mock(api.getOrders+"?hash="+md5("admin"+"12345"),{
+//   "orders|20-50":[
+//     {
+//       "key|+1":1,
+//       "symbol|1":symbols,
+//       "type|1":["Buy","Sell"],
+//       "price|100-200.2":1,
+//       "quantity|1-50":1,
+//       "status|1":["Processing","Canceled","Completed"],
+//       "datetime":"@date('yyyy-MM-dd')"
+//     }
+//   ]
+// });
 
 const links = [{
   key: 'Help',

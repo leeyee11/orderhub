@@ -14,48 +14,48 @@ const ButtonGroup = Button.Group;
 
 const symbols=["AAPL","C","GS","BIDU","WMT","SNE","DDAIF","VLKAY","GE","TSLA"];
 
-Mock.mock(api.getLevelOne,{
-  "market|10":[
-    {
-      "symbol|+1":symbols,
-      "bidQty|1-50":1,
-      "bidPrice|100-200.2":1,
-      "askPrice|100-200.2":1,
-      "askQty|1-50":1
-    }
-  ]
-});
+// Mock.mock(api.getLevelOne,{
+//   "market|10":[
+//     {
+//       "symbol|+1":symbols,
+//       "bidQty|1-50":1,
+//       "bidPrice|100-200.2":1,
+//       "askPrice|100-200.2":1,
+//       "askQty|1-50":1
+//     }
+//   ]
+// });
 
-Mock.mock(api.getLevelTwo, {
-  "bid|10-30":[
-    {
-      "key|+1":0,
-      "bidPrice|100-200.2":1,
-      "bidQty|1-50":1,
-    }
-  ],
-  "ask|10-30":[
-    {
-      "key|+1":0,
-      "askPrice|100-200.2":1,
-      "askQty|1-50":1,
-    }
-  ]
-});
+// Mock.mock(api.getLevelTwo+"?symbol=AAPL", {
+//   "bid|10-30":[
+//     {
+//       "key|+1":0,
+//       "bidPrice|100-200.2":1,
+//       "bidQty|1-50":1,
+//     }
+//   ],
+//   "ask|10-30":[
+//     {
+//       "key|+1":0,
+//       "askPrice|100-200.2":1,
+//       "askQty|1-50":1,
+//     }
+//   ]
+// });
 
 
-Mock.mock(api.postBid,{
-  "result":{
-    "status|1":["success","fail"],
-    "info|1":["error network","no permittion"]
-  }
-})
-Mock.mock(api.postAsk,{
-  "result":{
-    "status|1":["success","fail"],
-    "info|1":["error network","no permittion"]
-  }
-})
+// Mock.mock(api.postBid,{
+//   "result":{
+//     "status|1":["success","fail"],
+//     "info|1":["error network","no permittion"]
+//   }
+// })
+// Mock.mock(api.postAsk,{
+//   "result":{
+//     "status|1":["success","fail"],
+//     "info|1":["error network","no permittion"]
+//   }
+// })
 
 
 const nodeGen={
@@ -102,7 +102,7 @@ class Market extends Component {
   constructor(props){
     super(props);
     this.state = {
-      company:"AAPL",
+      symbol:"AAPL",
       orderType:"MKT",
       market:[],
       bid:[],
@@ -141,7 +141,7 @@ class Market extends Component {
       });
     } 
     const apiURL=(type=='bid')?api.postBid:api.postAsk;
-    axios.post(apiURL,data)
+    axios.post(apiURL,{'data':JSON.stringify(data)})
     .then((res)=>{
       if(res.data.result.status=="success"){
         message.info(res.data.result.status);
@@ -165,10 +165,10 @@ class Market extends Component {
     })
 
     //LevelTwo
-    axios.get(api.getLevelTwo)
+    axios.get(api.getLevelTwo+"?symbol="+this.state.symbol)
     .then((res)=>{
       const sortByBidPrice=(p,n)=>{
-        return p.bidPrice-n.bidPrice
+        return n.bidPrice-p.bidPrice
       }
       const sortByAskPrice=(p,n)=>{
         return p.askPrice-n.askPrice
@@ -224,6 +224,7 @@ class Market extends Component {
             theme="dark"
             style={{height: '100%',width:'100%'}}
             defaultSelectedKeys={['AAPL']}
+            onSelect={({item,key,selectedKey})=>{this.setState({symbol:key})}}
             mode="inline"
             >
               {MenuItems}
@@ -287,7 +288,7 @@ class Market extends Component {
             <Card style={{marginTop:24}}>
               <Row>
               <Card.Grid style={{width:'100%',height:96}}>
-                <h1>{this.state.company}</h1>
+                <h1>{this.state.symbol}</h1>
               </Card.Grid>
               </Row>
               <Row gutter={24} style={{marginTop:24}}>
@@ -335,8 +336,8 @@ class Market extends Component {
               </Row>
               <Row style={{marginTop:24}}>
                 <ButtonGroup>
-                  <Button type="primary" style={{width:160}} onClick={()=>this.submitHandler()}>Bid</Button>
-                  <Button style={{width:160,borderColor:'#40a9ff'}} onClick={()=>this.submitHandler()}>Ask</Button>
+                  <Button type="primary" style={{width:160}} onClick={()=>this.submitHandler('bid')}>Bid</Button>
+                  <Button style={{width:160,borderColor:'#40a9ff'}} onClick={()=>this.submitHandler('ask')}>Ask</Button>
                 </ButtonGroup>
               </Row>
             </Card>

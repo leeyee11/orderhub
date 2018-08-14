@@ -3,9 +3,7 @@ import { Card } from 'antd';
 import Market from './Market'
 import Dashboard from './Dashboard'
 import User from './User'
-
-import  './Home.css';
-
+ 
 class Home extends Component {
   constructor(props){
     super(props);
