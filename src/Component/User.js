@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import {Layout,Table,Divider,Icon,Card,Form, Input, Button, Checkbox,Row,Col} from 'antd';
+import GlobalFooter from 'ant-design-pro/lib/GlobalFooter';
 import axios from "axios";
 import Mock from 'mockjs';
 import md5 from 'md5'
@@ -28,6 +29,23 @@ Mock.mock(api.getOrders+"?hash="+md5("admin"+"12345"),{
   ]
 });
 
+const links = [{
+  key: 'Help',
+  title: 'Help',
+  href: '',
+}, {
+  key: 'github',
+  title: <Icon type="github" />,
+  href: 'https://github.com/leeyee11',
+  blankTarget: true,
+}, {
+  key: 'About',
+  title: 'Aout',
+  href: '',
+  blankTarget: true,
+}];
+
+const copyright = <div>Copyright <Icon type="copyright" /> 2018 Produced by Phoenix</div>;
 
 class User extends Component {
   constructor(props){
@@ -44,10 +62,10 @@ class User extends Component {
     }
   }
   postSignIn(){
-    const soeid=this.refs.soeid.input.value;
+    const userid=this.refs.userid.input.value;
     const password=this.refs.password.input.value;
     axios
-    .post(api.postSignIn,{"soeid":soeid,"password":password})
+    .post(api.postSignIn,{"userid":userid,"password":password})
     .then((res)=>{
       this.props.store.dispatch({type: 'SIGNIN',hash:res.data.hash})
       this.getOrders(this.props.store.getState().hash)
@@ -161,11 +179,11 @@ class User extends Component {
             </Card>
           </Col>
           <Col md={12} sm={24}>
-            <Card style={{width:360,height:320,boxShadow:'1px 1px 10px 1px rgba(0,0,0,0.5)'}} align="center">
+            <Card style={{width:360,height:320,boxShadow:'1px 1px 10px 1px rgba(0,0,0,0.5)'}} align="center" bordered={false}>
               <Form className="login-form">
                 <h1>Order Hub</h1>
                 <FormItem>
-                  <Input ref="soeid" prefix={<Icon type="user" style={{ color: 'rgba(0,0,0,.25)' }} />} placeholder="Username" />
+                  <Input ref="userid" prefix={<Icon type="user" style={{ color: 'rgba(0,0,0,.25)' }} />} placeholder="Username" />
                 </FormItem>
                 <FormItem>
                   <Input ref="password" prefix={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />} type="password" placeholder="Password" />
@@ -182,8 +200,8 @@ class User extends Component {
           </Col>
         </Row>
       </Card>
-      <Card style={{height:'calc(100% - 480px - 24px)',backgroundColor:'#666',border:'none'}}>
-        
+      <Card style={{height:'calc(100% - 560px - 48px)',minHeight:180,backgroundColor:'#f5f5f5',border:'none'}}>
+            <GlobalFooter links={links} copyright={copyright}/>
       </Card>
       </div>
       );

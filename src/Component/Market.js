@@ -1,15 +1,16 @@
 import React, { Component } from 'react';
-import { Select,Table,Card,Row, Col,InputNumber,Layout,Menu,Tag,Icon} from 'antd';
+import { Select,Table,Card,Row, Col,Layout,Menu,Tag,Icon,Input,Button,message} from 'antd';
 import ReactEcharts from 'echarts-for-react';
 import options from '../config/charts.json';
 import axios from 'axios';
 import Mock from 'mockjs';
 import api from '../config/api.json'
-import './Market.css';
+import orders from '../config/orders.json'
 
 const Option = Select.Option;
 const { Column } = Table;
 const { Content,Sider } = Layout;
+const ButtonGroup = Button.Group;
 
 const symbols=["AAPL","C","GS","BIDU","WMT","SNE","DDAIF","VLKAY","GE","TSLA"];
 
@@ -43,6 +44,60 @@ Mock.mock(api.getLevelTwo, {
 });
 
 
+Mock.mock(api.postBid,{
+  "result":{
+    "status|1":["success","fail"],
+    "info|1":["error network","no permittion"]
+  }
+})
+Mock.mock(api.postAsk,{
+  "result":{
+    "status|1":["success","fail"],
+    "info|1":["error network","no permittion"]
+  }
+})
+
+
+const nodeGen={
+      input:(ref)=>{
+        const placeholder=((name) =>name.replace(/([A-Z])/g," $1").toLowerCase())(ref);
+        return (
+          <Input style={{ width: '100%' }} type="number" ref={ref} placeholder={placeholder}/>
+        );
+      }
+    }
+
+const nodeLayout=(nodes)=>{
+  let placeOrder;
+  if(nodes.length==0){
+      placeOrder=(<div></div>)
+  }else if(nodes.length==1){
+        placeOrder=(
+          <div>
+            <Row gutter={24} style={{marginTop:24}}>
+              <Col span={24}>
+                {nodes[0]}
+              </Col>
+            </Row>
+          </div>
+          )
+  }else if(nodes.length==2){
+        placeOrder=(
+          <div>
+            <Row gutter={24} style={{marginTop:24}}>
+              <Col span={12}>
+                {nodes[0]}
+              </Col>
+              <Col span={12}>
+                {nodes[1]}
+              </Col>
+            </Row>
+          </div>
+          )
+      }
+    return placeOrder;
+}
+
 class Market extends Component {
   constructor(props){
     super(props);
@@ -53,7 +108,9 @@ class Market extends Component {
       bid:[],
       ask:[],
       interval:null,
-      collapse:true
+      collapse:true,
+      fillOrKill:"fill",
+      durationType:"None",
     };
   }
   componentDidMount(){
@@ -61,6 +118,41 @@ class Market extends Component {
   }
   componentWillUnmount(){
     clearInterval(this.state.interval);
+  }
+  submitHandler(type){
+    if(Number.isNaN(this.refs.qty.input.value)||this.refs.qty.input.value==""){
+      message.warning("illegal input!");
+      return ;
+    }
+    const data={
+      "orderType":this.state.orderType,
+      "quantity":this.refs.qty.input.value,
+    }
+    if(this.state.orderType!='MKT'){
+      data["fillOrKill"]=this.state.fillOrKill;
+      data["durationType"]=this.state.durationType;
+      orders[this.state.orderType].nodes.map(order=>{
+        if(order.type=='input'&&!Number.isNaN(this.refs[order.ref].input.value)&&this.refs[order.ref].input.value!=""){
+          data[order.ref]=this.refs[order.ref].input.value;
+        }else{
+          message.warning("illegal input!");
+          return;
+        }
+      });
+    } 
+    const apiURL=(type=='bid')?api.postBid:api.postAsk;
+    axios.post(apiURL,data)
+    .then((res)=>{
+      if(res.data.result.status=="success"){
+        message.info(res.data.result.status);
+      }else{
+        message.error('Something wrong:'+res.data.result.info);
+      }
+    })
+    .catch((err)=>{
+      message.error('Something wrong');
+      console.log(err);
+    })
   }
   loop(){
     //LevelOne
@@ -73,10 +165,18 @@ class Market extends Component {
     })
 
     //LevelTwo
-  axios.get(api.getLevelTwo)
+    axios.get(api.getLevelTwo)
     .then((res)=>{
-      this.setState({bid:res.data.bid})
-      this.setState({ask:res.data.ask})
+      const sortByBidPrice=(p,n)=>{
+        return p.bidPrice-n.bidPrice
+      }
+      const sortByAskPrice=(p,n)=>{
+        return p.askPrice-n.askPrice
+      }
+      const bid=res.data.bid.sort(sortByBidPrice)
+      const ask=res.data.ask.sort(sortByAskPrice)
+      this.setState({bid:bid})
+      this.setState({ask:ask})
     })
     .catch((err)=>{
       console.log(err);
@@ -98,6 +198,10 @@ class Market extends Component {
           </Row>
         </Menu.Item>);
     })
+
+    const nodes=orders[this.state.orderType].nodes.map((o)=>{return (nodeGen[o.type](o.ref))});
+    const placeOrder=nodeLayout(nodes);
+
     return (
         <Layout className="Market" style={{height:'100%'}}>
           <Sider width={this.state.collapse?100:360} style={{overflow:"hidden"}}>
@@ -119,8 +223,7 @@ class Market extends Component {
             mode="inline"
             theme="dark"
             style={{height: '100%',width:'100%'}}
-            defaultSelectedKeys={['1']}
-            defaultOpenKeys={['sub1']}
+            defaultSelectedKeys={['AAPL']}
             mode="inline"
             >
               {MenuItems}
@@ -181,39 +284,60 @@ class Market extends Component {
               onEvents={null}
               opts={null}/>
             </Card>
-            <Card style={{height:320,marginTop:24}}>
-              <Select
-              showSearch
-              size="large"
-              style={{ width: '100%' }}
-              onChange={(value)=>{this.setState({orderType:value})}}
-              defaultValue={this.state.orderType}>
-              <Option value="MKT">Market Order</Option>
-                <Option value="LMT">Limit Order</Option>
-                <Option value="STP">Stop Order</Option>
-                <Option value="STPL">Stop Loss Order</Option>
-                <Option value="STPLMT">Stop Limit Order</Option>
-                <Option value="MIT">Market If Touched</Option>
-                <Option value="LIT">Limit If Touched</Option>
-              </Select>
-              <br/>
-              <br/>
-              <Row gutter={24}>
+            <Card style={{marginTop:24}}>
+              <Row>
+              <Card.Grid style={{width:'100%',height:96}}>
+                <h1>{this.state.company}</h1>
+              </Card.Grid>
+              </Row>
+              <Row gutter={24} style={{marginTop:24}}>
                 <Col span={12}>
-                  <InputNumber
-                  style={{ width: '100%' }}
-                  defaultValue={1000}
-                  formatter={value => `$ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-                  parser={value => value.replace(/\$\s?|(,*)/g, '')}
-                />
+                  <Select
+                  showSearch
+                  ref="orderType"
+                  style={{width:'100%'}}
+                  onChange={(value)=>{this.setState({orderType:value})}}
+                  defaultValue={this.state.orderType}>
+                    <Option value="MKT">Market Order</Option>
+                    <Option value="LMT">Limit Order</Option>
+                    <Option value="STP">Stop Order</Option>
+                    <Option value="STPL">Stop Loss Order</Option>
+                    <Option value="STPLMT">Stop Limit Order</Option>
+                    <Option value="MIT">Market If Touched</Option>
+                    <Option value="LIT">Limit If Touched</Option>
+                  </Select>
                 </Col>
                 <Col span={12}>
-                  <InputNumber
-                  style={{ width: '100%' }}
-                  defaultValue={1000}
-                  formatter={value => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-                  />
+                  <Input style={{ width: '100%' }} type="number" ref="qty" placeholder="quantity"/>
                 </Col>
+              </Row>
+              {placeOrder}
+              <Row gutter={24} style={{marginTop:24,display:this.state.orderType=='MKT'?'none':'block'}}>
+                <Col span={12}>
+                  <Select style={{width:'100%'}} defaultValue="fill" onChange={(value)=>this.setState({fillOrKill:value})}>
+                    <Option value="FILL">fill</Option>
+                    <Option value="KILL">kill</Option>
+                  </Select>
+                </Col>
+                <Col span={12}>
+                  <Select style={{width:'100%'}} defaultValue="None" onChange={(value)=>this.setState({durationType :value})}>
+                    <Option value="NONE">None</Option>
+                    <Option value="DAY">Day</Option>
+                    <Option value="GTC">Good Till Canceled</Option>
+                    <Option value="GTD">Good Till Date</Option>
+                    <Option value="IOC">Immediate Or Cancel</Option>
+                    <Option value="AON">All or None</Option>
+                    <Option value="ATO">At the Opening</Option>
+                    <Option value="ATC">At the Close</Option>
+                    <Option value="MIN">Minute</Option>
+                  </Select>
+                </Col>
+              </Row>
+              <Row style={{marginTop:24}}>
+                <ButtonGroup>
+                  <Button type="primary" style={{width:160}} onClick={()=>this.submitHandler()}>Bid</Button>
+                  <Button style={{width:160,borderColor:'#40a9ff'}} onClick={()=>this.submitHandler()}>Ask</Button>
+                </ButtonGroup>
               </Row>
             </Card>
           </Col>

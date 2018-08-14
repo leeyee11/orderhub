@@ -1,6 +1,6 @@
 {
 	"getOrders":"/get/orders",
-	"getDashboard":"get/dashboard",
+	"getDashboard":"/get/dashboard",
 	"getLevelOne":"/get/levelone",
 	"getLevelTwo":"/get/leveltwo",
 	"postSignIn":"/post/signin",
