@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import {Layout,Table,Divider,Icon,Card,Form, Input, Button, Checkbox,Row,Col} from 'antd';
+import {Layout,Table,Divider,Icon,Card,Form, Input, Button, Checkbox,Row,Col,message} from 'antd';
 import GlobalFooter from 'ant-design-pro/lib/GlobalFooter';
 import axios from "axios";
 import Mock from 'mockjs';
@@ -15,12 +15,20 @@ const symbols=["AAPL","C","GS","BIDU","WMT","SNE","DDAIF","VLKAY","GE","TSLA"];
 //   "hash":md5("admin"+"12345")
 // });
 
+// Mock.mock(api.postCancel,{
+//   "result":{
+//     "status|1":["success","failed"],
+//     "info|1":["error network","no permittion"]
+//   }
+// });
+
 // Mock.mock(api.getOrders+"?hash="+md5("admin"+"12345"),{
 //   "orders|20-50":[
 //     {
 //       "key|+1":1,
 //       "symbol|1":symbols,
-//       "type|1":["Buy","Sell"],
+//       "orderType|1":["MKT","LMT","STP","STPL","STPLMT","MIT","LIT"],
+//       "action|1":["Buy","Sell"],
 //       "price|100-200.2":1,
 //       "quantity|1-50":1,
 //       "status|1":["Processing","Canceled","Completed"],
@@ -64,8 +72,12 @@ class User extends Component {
   postSignIn(){
     const userid=this.refs.userid.input.value;
     const password=this.refs.password.input.value;
+    if(Number.isNaN(userid)||Number.isNaN(password)){
+      message.warning("userid or password is wrong");
+      return;
+    }
     axios
-    .post(api.postSignIn,{"userid":userid,"password":password})
+    .post(api.postSignIn,JSON.stringify({"userid":userid,"password":password}))
     .then((res)=>{
       this.props.store.dispatch({type: 'SIGNIN',hash:res.data.hash})
       this.getOrders(this.props.store.getState().hash)
@@ -86,6 +98,19 @@ class User extends Component {
   }
   viewOrder(id){
 
+  }
+  cancelOrder(id){
+    axios
+    .post(api.postCancel,JSON.stringify({orderid:id,hash:this.props.store.getState().hash}))
+    .then((res)=>{
+      if(res.data.result.status=="success"){
+        message.info("success");
+        this.getOrders(this.props.store.getState().hash);
+      }else{
+        message.error("failed: "+res.data.result.info);
+      }
+    })
+    .catch((err)=>{console.log(err)})
   }
   render() {
     let { sortedInfo, filteredInfo } = this.state;
@@ -112,15 +137,31 @@ class User extends Component {
                   onFilter={(value, record) => record.symbol.includes(value)}
                   />
                 <Column
-                  title="Type"
-                  dataIndex="type"
-                  key="type"
+                  title="Order Type"
+                  dataIndex="orderType"
+                  key="orderType"
+                  filters={[
+                    { text: 'MKT', value: 'MKT' },
+                    { text: 'LMT', value: 'LMT' },
+                    { text: 'STP', value: 'STP' },
+                    { text: 'STPL', value: 'STPL' },
+                    { text: 'STPLMT', value: 'STPLMT' },
+                    { text: 'MIT', value: 'MIT' },
+                    { text: 'LIT', value: 'LIT' }
+                  ]}
+                  filteredValue={filteredInfo.orderType || null}
+                  onFilter={(value, record) => record.orderType.includes(value)}
+                  />
+                <Column
+                  title="Action"
+                  dataIndex="action"
+                  key="action"
                   filters={[
                     { text: 'Buy', value: 'Buy' },
                     { text: 'Sell', value: 'Sell' },
                   ]}
-                  filteredValue={filteredInfo.type || null}
-                  onFilter={(value, record) => record.type.includes(value)}
+                  filteredValue={filteredInfo.action || null}
+                  onFilter={(value, record) => record.action.includes(value)}
                   />
                 <Column
                   title="Price"
@@ -150,13 +191,22 @@ class User extends Component {
                   onFilter={(value, record) => record.status.includes(value)}
                   />
                 <Column
-                  title="Action"
-                  key="action"
+                  title="Operation"
+                  key="operation"
                   render={(text, record) => (
                 <span>
-                  <a href="javascript:;" onClick={()=>{this.viewOrder(record.key)}}>View</a>
+                  <a 
+                  href="javascript:;" 
+                  onClick={()=>{this.viewOrder(record.key)}}>
+                    View
+                  </a>
                 <Divider type="vertical" style={{display:(record.status=='Processing')?'inline':'none'}}/>
-                  <a href="javascript:;" style={{display:(record.status=='Processing')?'inline':'none'}}>Cancel</a>
+                  <a 
+                  href="javascript:;" 
+                  style={{display:(record.status=='Processing')?'inline':'none'}}
+                  onClick={()=>{this.cancelOrder(record.key)}}>
+                  Cancel
+                  </a>
                 </span>
                 )}/>
               </Table>

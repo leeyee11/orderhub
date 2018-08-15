@@ -3,7 +3,9 @@
 	"getDashboard":"/get/dashboard",
 	"getLevelOne":"/get/levelone",
 	"getLevelTwo":"/get/leveltwo",
+	"getPriceHistory":"/get/pricehistory",
 	"postSignIn":"/post/signin",
 	"postBid":"/post/bid",
-	"postAsk":"/post/ask"
+	"postAsk":"/post/ask",
+	"postCancel":"/post/cancel"
 }

@@ -1,0 +1,6 @@
+.ant-card-head-wrapper{
+	position: absolute;
+	right: 0;
+	padding-right: 2em;
+	z-index: 99;
+}

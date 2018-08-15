@@ -1,10 +1,8 @@
 {
-	"market":{
+	"priceHistory":{
     	"xAxis": {
     		"show":true,
-        "type": "category",
-        "min":"dataMin",
-        "data": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+        "min":"dataMin"
     	},
     	"yAxis": {
         "min":"dataMin",
@@ -27,10 +25,8 @@
             }
         },
     	"series": [{
-        	"data": [820, 932, 901, 934, 1290, 1330, 1320],
         	"type": "line"
     	},{
-    		"data": [840, 950, 870, 940, 1320, 1350, 1300],
         	"type": "line"
     	}]
 	},
@@ -108,3 +104,4 @@
 
 	}
 }
+

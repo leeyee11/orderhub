@@ -3,18 +3,13 @@ import { Card } from 'antd';
 import Market from './Market'
 import Dashboard from './Dashboard'
 import User from './User'
- 
+import './Home.css'
 class Home extends Component {
   constructor(props){
     super(props);
-    this.state = {
-      key: 'Market',
-      active: 'Market',
-    }
   }
   onTabChange(key, type){
-    console.log(key, type);
-    this.setState({[type]: key });
+    this.props.store.dispatch({type:'SWITCHTAB',tab:key})
   }
   render() {
     if(this.props.store.getState().hash){
@@ -50,10 +45,11 @@ class Home extends Component {
           style={{ width: '100%',height:'100%'}}
           bodyStyle={{padding:0,height:'calc( 100% - 53px )'}}
           tabList={this.tabs}
-          activeTabKey={this.state.active}
+          activeTabKey={this.props.store.getState().tab}
           onTabChange={(key) => { this.onTabChange(key,'active'); }}
+          extra={this.props.store.getState().hash==null?<span></span>:<a onClick={()=>this.props.store.dispatch({type:'SIGNOUT'})}>Sign Out</a>}
         >
-          {this.contents[this.state.active]}
+          {this.contents[this.props.store.getState().tab]}
         </Card>
     );
   }

@@ -57,6 +57,20 @@ const symbols=["AAPL","C","GS","BIDU","WMT","SNE","DDAIF","VLKAY","GE","TSLA"];
 //   }
 // })
 
+// Mock.mock(api.getPriceHistory,{
+//   "bidHistory|20-30":[
+//     [
+//       "@date('yyyy-MM-dd')",
+//       100+100*Math.random()
+//     ]
+//   ],
+//   "askHistory|20-30":[
+//     [
+//       "@date('yyyy-MM-dd')",
+//       100+100*Math.random()
+//     ]
+//   ]
+// })
 
 const nodeGen={
       input:(ref)=>{
@@ -105,12 +119,14 @@ class Market extends Component {
       symbol:"AAPL",
       orderType:"MKT",
       market:[],
+      filter:null,
       bid:[],
       ask:[],
       interval:null,
       collapse:true,
       fillOrKill:"fill",
       durationType:"None",
+      priceHistory:options.priceHistory
     };
   }
   componentDidMount(){
@@ -119,12 +135,19 @@ class Market extends Component {
   componentWillUnmount(){
     clearInterval(this.state.interval);
   }
-  submitHandler(type){
+  handleSubmit(type){
+    if(this.props.store.getState().hash==null){
+      message.warning("please sign in");
+      this.props.store.dispatch({type:'SWITCHTAB',tab:'User'})
+      return;
+    }
     if(Number.isNaN(this.refs.qty.input.value)||this.refs.qty.input.value==""){
       message.warning("illegal input!");
       return ;
     }
     const data={
+      "hash":this.props.store.getState().hash,
+      "symbol":this.state.symbol,
       "orderType":this.state.orderType,
       "quantity":this.refs.qty.input.value,
     }
@@ -141,7 +164,7 @@ class Market extends Component {
       });
     } 
     const apiURL=(type=='bid')?api.postBid:api.postAsk;
-    axios.post(apiURL,{'data':JSON.stringify(data)})
+    axios.post(apiURL,JSON.stringify(data))
     .then((res)=>{
       if(res.data.result.status=="success"){
         message.info(res.data.result.status);
@@ -181,12 +204,35 @@ class Market extends Component {
     .catch((err)=>{
       console.log(err);
     });
+    axios.get(api.getPriceHistory)
+    .then((res)=>{
+      const priceHistoryOption=this.state.priceHistory;
+      priceHistoryOption['series'][0]['data']=res.data.bidHistory;
+      priceHistoryOption['series'][1]['data']=res.data.askHistory;
+      this.setState({priceHistory:priceHistoryOption})
+    })
+    .catch((err)=>{
+      console.log(err);
+    });
+
   }
   collapse(){
     this.setState({"collapse":!this.state.collapse})
   }
   render() {
-    const MenuItems=this.state.market.map(item=>{
+    let filteredMarket;
+    if(this.state.filter!=null&&this.state.filter!=''){
+      filteredMarket=this.state.market.filter(item=>{
+        if(item.symbol.indexOf(this.state.filter)>=0){
+          return true;
+        }else{
+          return false;
+        }
+      });
+    }else{
+      filteredMarket=this.state.market;
+    }
+    const MenuItems=filteredMarket.map(item=>{
       return (
         <Menu.Item key={item.symbol} style={{paddingLeft:0,paddingRight:0}}>
           <Row>
@@ -222,13 +268,19 @@ class Market extends Component {
             onClick={this.handleClick}
             mode="inline"
             theme="dark"
-            style={{height: '100%',width:'100%'}}
+            style={{height: 'calc(100% - 36px - 48px - 1px)',width:'100%'}}
             defaultSelectedKeys={['AAPL']}
             onSelect={({item,key,selectedKey})=>{this.setState({symbol:key})}}
             mode="inline"
             >
               {MenuItems}
             </Menu>
+            <div style={{height:36,padding:3}}>
+              <Input 
+              placeholder="search"
+              style={{height:30,backgroundColor:'inherit',outline:'none',border:'1px solid rgba(255,255,255,0.3)',color:'#fff'}} 
+              onInput={(e)=>this.setState({filter:e.target.value.toUpperCase()})}/>
+            </div>
           </Sider>
           <Content style={{height:'100%',padding:24}}>
           <Row gutter={24} style={{height:'100%'}}>
@@ -277,7 +329,7 @@ class Market extends Component {
               <ReactEcharts
               ReactEcharts
               style={{width:'100%',height:230}}
-              option={options.market}
+              option={this.state.priceHistory}
               notMerge={true}
               lazyUpdate={true}
               theme={"theme_name"}
@@ -336,8 +388,8 @@ class Market extends Component {
               </Row>
               <Row style={{marginTop:24}}>
                 <ButtonGroup>
-                  <Button type="primary" style={{width:160}} onClick={()=>this.submitHandler('bid')}>Bid</Button>
-                  <Button style={{width:160,borderColor:'#40a9ff'}} onClick={()=>this.submitHandler('ask')}>Ask</Button>
+                  <Button type="primary" style={{width:160}} onClick={()=>this.handleSubmit('bid')} >Buy</Button>
+                  <Button style={{width:160,borderColor:'#40a9ff'}} onClick={()=>this.handleSubmit('ask')} >Sell</Button>
                 </ButtonGroup>
               </Row>
             </Card>
