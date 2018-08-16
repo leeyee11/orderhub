@@ -4,3 +4,9 @@
 	padding-right: 2em;
 	z-index: 99;
 }
+.TabsCard .ant-card-head{
+	box-shadow: 0px 0px 12px 1px rgba(0,0,0,0.2);
+}
+.TabsCard .ant-card-body{
+	overflow: hidden;
+}

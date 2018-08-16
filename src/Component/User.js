@@ -5,6 +5,7 @@ import axios from "axios";
 import Mock from 'mockjs';
 import md5 from 'md5'
 import api from '../config/api';
+import './User.css'
 const {Content} = Layout;
 const {Column}=Table;
 const FormItem = Form.Item;
@@ -120,7 +121,7 @@ class User extends Component {
     if(this.props.store.getState().hash){
       content=(
         <Content style={{height:'100%',padding:24}}>
-          <Card bodyStyle={{border:'none',paddingBottom:0}}>
+          <Card className="OrderManagement" bodyStyle={{border:'none',paddingBottom:0}}>
             <Table 
             dataSource={this.state.orders} 
             onChange={(p,f,s)=>this.setState({filteredInfo: f,sortedInfo: s})}>

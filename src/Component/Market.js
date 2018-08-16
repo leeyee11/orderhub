@@ -7,6 +7,7 @@ import Mock from 'mockjs';
 import api from '../config/api';
 import orders from '../config/orders';
 import data from '../config/test';
+import './Market.css'
 
 const Option = Select.Option;
 const { Column } = Table;
@@ -264,7 +265,7 @@ class Market extends Component {
 
     return (
         <Layout className="Market" style={{height:'100%'}}>
-          <Sider width={this.state.collapse?100:360} style={{overflow:"hidden"}}>
+          <Sider className="SymbolSider" width={this.state.collapse?100:360} style={{overflow:"hidden"}}>
             <div style={{color:"#ffffff",height:'48px',lineHeight:'48px',paddingLeft:25,backgroundColor:'#234'}}>
               <Row>
                 <Col span={this.state.collapse?24:6} align="left">
@@ -299,7 +300,7 @@ class Market extends Component {
           <Content style={{height:'100%',padding:24}}>
           <Row gutter={24} style={{height:'100%'}}>
           <Col span={12}>
-            <Card bodyStyle={{paddingBottom:0}}>
+            <Card className="OrderBookDetail" bodyStyle={{paddingBottom:0}}>
               <Row gutter={12}>
                 <Col span={12}>
                 <Table 
@@ -312,6 +313,7 @@ class Market extends Component {
                   key="bidQty"
                   />
                   <Column
+                  className="BidPrice"
                   title="BidPrice"
                   dataIndex="bidPrice"
                   key="bidPrice"
@@ -324,6 +326,7 @@ class Market extends Component {
                 size="middle" 
                 dataSource={this.state.ask} >
                   <Column
+                  className="AskPrice"
                   title="Ask Price"
                   dataIndex="askPrice"
                   key="askPrice"
@@ -339,10 +342,10 @@ class Market extends Component {
             </Card>
           </Col>
           <Col span={12}>
-            <Card bodyStyle={{padding:10,height:230}}>
+            <Card className="OrderBookDetail" bodyStyle={{padding:10,height:230}}>
               {priceHistoryChart}
             </Card>
-            <Card style={{marginTop:24}}>
+            <Card  className="OrderBookDetail" style={{marginTop:24}}>
               <Row>
               <Card.Grid style={{width:'100%',height:96}}>
                 <h1>{this.state.symbol}</h1>

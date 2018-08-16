@@ -12,6 +12,7 @@ import md5 from 'md5';
 import api from '../config/api'
 import data from '../config/test'
 import moment from 'moment';
+import './Dashboard.css'
 
 const {Content} = Layout;
 
@@ -100,28 +101,28 @@ class DashBoard extends Component {
             <Content style={{padding:24}}>
             <Row gutter={24}>
               <Col span={6}>
-                <ChartCard style={{height:180}} title="Bid" align="left"
+                <ChartCard className="DashboardCard" style={{height:180}} title={<strong>Bid today</strong>} align="left"
                 total={() => (<span dangerouslySetInnerHTML={{ __html: this.state.bidOrderIndex.today }} />)}
                 footer={<Field label="Total" value={this.state.bidOrderIndex.total} />} contentHeight={46}>
                 <MiniBar color="#cceafe"height={45} data={this.state.bidOrderIndex.history} />
                 </ChartCard>
               </Col>
               <Col span={6}>
-               <ChartCard style={{height:180}} title="Ask" align="left"
+               <ChartCard className="DashboardCard" style={{height:180}} title={<strong>Ask today</strong>} align="left"
                 total={() => (<span dangerouslySetInnerHTML={{ __html: this.state.askOrderIndex.today }} />)}
                 footer={<Field label="Total" value={this.state.askOrderIndex.total} />} contentHeight={46}>
                 <MiniBar color="#cceafe"height={45} data={this.state.askOrderIndex.history} />
                 </ChartCard>
               </Col>
               <Col span={6}>
-                <ChartCard style={{height:180}} title="Completed" align="left"
+                <ChartCard className="DashboardCard" style={{height:180}} title={<strong>Completed today</strong>} align="left"
                 total={() => (<span dangerouslySetInnerHTML={{ __html: this.state.completedOrderIndex.today }} />)}
                 footer={<Field label="Total" value={this.state.completedOrderIndex.total} />} contentHeight={46}>
                 <MiniArea line color="#cceafe"height={45} data={this.state.completedOrderIndex.history} />
                 </ChartCard>
               </Col>
               <Col span={6}>
-                <ChartCard style={{height:180}} title="Canceled" align="left"
+                <ChartCard className="DashboardCard" style={{height:180}} title={<strong>Canceled today</strong>} align="left"
                 total={() => (<span dangerouslySetInnerHTML={{ __html: this.state.canceledOrderIndex.today }} />)}
                 footer={<Field label="Total" value={this.state.canceledOrderIndex.total} />} contentHeight={46}>
                 <MiniArea line color="#cceafe"height={45} data={this.state.canceledOrderIndex.history} />
@@ -130,7 +131,7 @@ class DashBoard extends Component {
             </Row>
             <Row style={{marginTop:24}}>
               <Col span={24}>
-                <Card style={{padding:0}}>
+                <Card className="DashboardCard" style={{padding:0}}>
                   <ReactEcharts
                     ReactEcharts
                     style={{width:'100%',height:360}}
@@ -146,7 +147,7 @@ class DashBoard extends Component {
             </Row>
             <Row gutter={24} style={{marginTop:24}}>
               <Col span={12}>
-                <Card bodyStyle={{height:320,padding:0}}>
+                <Card className="DashboardCard" bodyStyle={{height:320,padding:0}}>
                   <Pie
                       hasLegend
                       title="Completed"
@@ -160,12 +161,12 @@ class DashBoard extends Component {
                       )}
                       data={this.state.symbolProportion}
                       valueFormat={val => <span dangerouslySetInnerHTML={{ __html: (val) }} />}
-                      height={280}
+                      height={320}
                   />
                 </Card>
               </Col>
               <Col span={12}>
-                <Card bodyStyle={{height:320,padding:0}}>
+                <Card className="DashboardCard" bodyStyle={{height:320,padding:0}}>
                   <TagCloud
                   data={this.state.symbolNumber}
                   height={230}/>
