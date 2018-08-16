@@ -15,7 +15,7 @@ import moment from 'moment';
 
 const {Content} = Layout;
 
-Mock.mock(api.getDashboard/*+"?hash="+md5(2)*/,data);
+Mock.mock(api.getDashboard/*+"?hash="+md5(2)*/,data);1
 
 class DashBoard extends Component {
   constructor(props){
@@ -27,19 +27,42 @@ class DashBoard extends Component {
       completedOrderIndex:{total:0,today:0,history:[]},
       canceledOrderIndex:{total:0,today:0,history:[]},
       symbolProportion:[],
-      symbolNumber:[]
+      symbolNumber:[],
+      scatter:{}
     }
   }
   componentDidMount(){
-    this.setState({interval:setInterval(()=>this.loop(),1000)});
+    this.once();
   }
   componentWillUnmount(){
-    clearInterval(this.state.interval);
   }
-  loop(){
-    axios.get(api.getDashboard,{params:{hash:this.props.store.getState().hash}})
-    // axios.get(api.getDashboard/*,{params:{hash:this.props.store.getState().hash}}*/)
+  once(){
+    // axios.get(api.getDashboard,{params:{hash:this.props.store.getState().hash}})
+    axios.get(api.getDashboard/*,{params:{hash:this.props.store.getState().hash}}*/)
     .then((res)=>{
+      const scatterOption=options.scatter;
+      scatterOption['legend']['data']=Object.keys(res.data.scatter);
+      // const colors=
+      const series=[];
+      var itemStyle = {
+        normal: {
+          opacity: 0.8,
+          shadowBlur: 10,
+          shadowOffsetX: 0,
+          shadowOffsetY: 0,
+          shadowColor: 'rgba(0, 0, 0, 0.5)'
+        }
+      };
+      Object.keys(res.data.scatter).map(key=>{
+        series.push({
+            name: key,
+            type: 'scatter',
+            itemStyle: itemStyle,
+            data: res.data.scatter[key]
+        })
+      })
+      scatterOption['series']=series;
+      console.log(JSON.stringify(scatterOption))
       this.setState({
         bidOrderIndex:{
           today:res.data.bidOrderIndex.today,
@@ -62,7 +85,8 @@ class DashBoard extends Component {
           history:res.data.canceledOrderIndex.history.map(i=>{return {x:i[0],y:i[1]}})
         },
         symbolProportion:res.data.symbolProportion,
-        symbolNumber:res.data.symbolNumber
+        symbolNumber:res.data.symbolNumber,
+        scatter:scatterOption
       });
     })
     .catch((err)=>{
@@ -109,8 +133,8 @@ class DashBoard extends Component {
                 <Card style={{padding:0}}>
                   <ReactEcharts
                     ReactEcharts
-                    style={{width:'100%',height:200}}
-                    option={options.balance}
+                    style={{width:'100%',height:360}}
+                    option={this.state.scatter}
                     notMerge={true}
                     lazyUpdate={true}
                     theme={"theme_name"}
@@ -122,7 +146,7 @@ class DashBoard extends Component {
             </Row>
             <Row gutter={24} style={{marginTop:24}}>
               <Col span={12}>
-                <Card bodyStyle={{height:230,padding:0}}>
+                <Card bodyStyle={{height:320,padding:0}}>
                   <Pie
                       hasLegend
                       title="Completed"
@@ -136,12 +160,12 @@ class DashBoard extends Component {
                       )}
                       data={this.state.symbolProportion}
                       valueFormat={val => <span dangerouslySetInnerHTML={{ __html: (val) }} />}
-                      height={230}
+                      height={280}
                   />
                 </Card>
               </Col>
               <Col span={12}>
-                <Card bodyStyle={{height:230,padding:0}}>
+                <Card bodyStyle={{height:320,padding:0}}>
                   <TagCloud
                   data={this.state.symbolNumber}
                   height={230}/>

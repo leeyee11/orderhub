@@ -174,21 +174,15 @@ class Market extends Component {
   once(key){
     axios.get(api.getPriceHistory,{params:{'symbol':key}})
     .then((res)=>{
-      console.log(options.priceHistory);
       const priceHistoryOption=options.priceHistory;
-      const history=res.data.priceHistory;
-      priceHistoryOption['xAxis']['data']=history.map(item=>{
-        return (new Date(item[0])).getTime();
-      })
-      priceHistoryOption['series'][0]['data']=history.map(item=>{
-        return Math.min(item[1],item[2])
-      });
-      priceHistoryOption['series'][1]['data']=history.map(item=>{
-        return (item[1]<item[2]?(item[2]-item[1]).toFixed(2):'-')
-      });
-      priceHistoryOption['series'][2]['data']=history.map(item=>{
-        return (item[1]>=item[2]?(item[1]-item[2]).toFixed(2):'-')
-      });
+      const history=splitData(res.data.priceHistory);
+      priceHistoryOption['xAxis']['data']=history.categoryData;
+      priceHistoryOption['series'][0]['data']=history.values;
+      priceHistoryOption['series'][1]['data']=calculateMA(5,history)
+      priceHistoryOption['series'][2]['data']=calculateMA(10,history)
+      priceHistoryOption['series'][3]['data']=calculateMA(20,history)
+      priceHistoryOption['series'][4]['data']=calculateMA(30,history)
+      console.log(priceHistoryOption)
       this.setState({priceHistory:priceHistoryOption});
     })
     .catch((err)=>{
@@ -255,7 +249,7 @@ class Market extends Component {
                           ?(<div/>)
                           :(<ReactEcharts
                             ReactEcharts
-                            style={{width:'100%',height:230}}
+                            style={{width:'100%',height:210}}
                             option={this.state.priceHistory}
                             notMerge={true}
                             lazyUpdate={true}
@@ -345,7 +339,7 @@ class Market extends Component {
             </Card>
           </Col>
           <Col span={12}>
-            <Card bodyStyle={{padding:0,height:230}}>
+            <Card bodyStyle={{padding:10,height:230}}>
               {priceHistoryChart}
             </Card>
             <Card style={{marginTop:24}}>
@@ -410,6 +404,35 @@ class Market extends Component {
           </Layout>    
     );
   }
+}
+
+function splitData(rawData) {
+    var categoryData = [];
+    var values = []
+    for (var i = 0; i < rawData.length; i++) {
+        categoryData.push(rawData[i].splice(0, 1)[0]);
+        values.push(rawData[i])
+    }
+    return {
+        categoryData: categoryData,
+        values: values
+    };
+}
+
+function calculateMA(dayCount,data0) {
+    var result = [];
+    for (var i = 0, len = data0.values.length; i < len; i++) {
+        if (i < dayCount) {
+            result.push('-');
+            continue;
+        }
+        var sum = 0;
+        for (var j = 0; j < dayCount; j++) {
+            sum += data0.values[i - j][1];
+        }
+        result.push(sum / dayCount);
+    }
+    return result;
 }
 
 export default Market;
