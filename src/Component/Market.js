@@ -1,76 +1,65 @@
 import React, { Component } from 'react';
 import { Select,Table,Card,Row, Col,Layout,Menu,Tag,Icon,Input,Button,message} from 'antd';
 import ReactEcharts from 'echarts-for-react';
-import options from '../config/charts.json';
+import options from '../config/charts';
 import axios from 'axios';
 import Mock from 'mockjs';
-import api from '../config/api.json'
-import orders from '../config/orders.json'
+import api from '../config/api';
+import orders from '../config/orders';
+import data from '../config/test';
 
 const Option = Select.Option;
 const { Column } = Table;
 const { Content,Sider } = Layout;
 const ButtonGroup = Button.Group;
+const { priceHistory } = data;
 
 const symbols=["AAPL","C","GS","BIDU","WMT","SNE","DDAIF","VLKAY","GE","TSLA"];
 
-// Mock.mock(api.getLevelOne,{
-//   "market|10":[
-//     {
-//       "symbol|+1":symbols,
-//       "bidQty|1-50":1,
-//       "bidPrice|100-200.2":1,
-//       "askPrice|100-200.2":1,
-//       "askQty|1-50":1
-//     }
-//   ]
-// });
+Mock.mock(api.getLevelOne,{
+  "market|10":[
+    {
+      "symbol|+1":symbols,
+      "bidQty|1-50":1,
+      "bidPrice|100-200.2":1,
+      "askPrice|100-200.2":1,
+      "askQty|1-50":1
+    }
+  ]
+});
 
-// Mock.mock(api.getLevelTwo+"?symbol=AAPL", {
-//   "bid|10-30":[
-//     {
-//       "key|+1":0,
-//       "bidPrice|100-200.2":1,
-//       "bidQty|1-50":1,
-//     }
-//   ],
-//   "ask|10-30":[
-//     {
-//       "key|+1":0,
-//       "askPrice|100-200.2":1,
-//       "askQty|1-50":1,
-//     }
-//   ]
-// });
+Mock.mock(api.getLevelTwo+"?symbol=AAPL", {
+  "bid|10-30":[
+    {
+      "key|+1":0,
+      "bidPrice|100-200.2":1,
+      "bidQty|1-50":1,
+    }
+  ],
+  "ask|10-30":[
+    {
+      "key|+1":0,
+      "askPrice|100-200.2":1,
+      "askQty|1-50":1,
+    }
+  ]
+});
 
 
-// Mock.mock(api.postBid,{
-//   "result":{
-//     "status|1":["success","fail"],
-//     "info|1":["error network","no permittion"]
-//   }
-// })
-// Mock.mock(api.postAsk,{
-//   "result":{
-//     "status|1":["success","fail"],
-//     "info|1":["error network","no permittion"]
-//   }
-// })
+Mock.mock(api.postBid,{
+  "result":{
+    "status|1":["success","fail"],
+    "info|1":["error network","no permittion"]
+  }
+})
+Mock.mock(api.postAsk,{
+  "result":{
+    "status|1":["success","fail"],
+    "info|1":["error network","no permittion"]
+  }
+})
 
-// Mock.mock(api.getPriceHistory,{
-//   "bidHistory|20-30":[
-//     [
-//       "@date('yyyy-MM-dd')",
-//       100+100*Math.random()
-//     ]
-//   ],
-//   "askHistory|20-30":[
-//     [
-//       "@date('yyyy-MM-dd')",
-//       100+100*Math.random()
-//     ]
-//   ]
-// })
+Mock.mock(api.getPriceHistory+"?symbol=AAPL",priceHistory);
 
 const nodeGen={
       input:(ref)=>{
@@ -126,14 +115,19 @@ class Market extends Component {
       collapse:true,
       fillOrKill:"fill",
       durationType:"None",
-      priceHistory:options.priceHistory
+      priceHistory:null,
     };
   }
   componentDidMount(){
     this.setState({interval:setInterval(()=>this.loop(),1000)});
+    this.once(this.state.symbol);
   }
   componentWillUnmount(){
     clearInterval(this.state.interval);
+  }
+  handleSelect({item,key,selectedKey}){
+    this.setState({symbol:key,priceHistory:null})
+    this.once(key);
   }
   handleSubmit(type){
     if(this.props.store.getState().hash==null){
@@ -177,6 +171,30 @@ class Market extends Component {
       console.log(err);
     })
   }
+  once(key){
+    axios.get(api.getPriceHistory,{params:{'symbol':key}})
+    .then((res)=>{
+      console.log(options.priceHistory);
+      const priceHistoryOption=options.priceHistory;
+      const history=res.data.priceHistory;
+      priceHistoryOption['xAxis']['data']=history.map(item=>{
+        return (new Date(item[0])).getTime();
+      })
+      priceHistoryOption['series'][0]['data']=history.map(item=>{
+        return Math.min(item[1],item[2])
+      });
+      priceHistoryOption['series'][1]['data']=history.map(item=>{
+        return (item[1]<item[2]?(item[2]-item[1]).toFixed(2):'-')
+      });
+      priceHistoryOption['series'][2]['data']=history.map(item=>{
+        return (item[1]>=item[2]?(item[1]-item[2]).toFixed(2):'-')
+      });
+      this.setState({priceHistory:priceHistoryOption});
+    })
+    .catch((err)=>{
+      console.log(err);
+    });
+  }
   loop(){
     //LevelOne
     axios.get(api.getLevelOne)
@@ -188,7 +206,7 @@ class Market extends Component {
     })
 
     //LevelTwo
-    axios.get(api.getLevelTwo+"?symbol="+this.state.symbol)
+    axios.get(api.getLevelTwo,{params:{'symbol':this.state.symbol}})
     .then((res)=>{
       const sortByBidPrice=(p,n)=>{
         return n.bidPrice-p.bidPrice
@@ -204,17 +222,6 @@ class Market extends Component {
     .catch((err)=>{
       console.log(err);
     });
-    axios.get(api.getPriceHistory)
-    .then((res)=>{
-      const priceHistoryOption=this.state.priceHistory;
-      priceHistoryOption['series'][0]['data']=res.data.bidHistory;
-      priceHistoryOption['series'][1]['data']=res.data.askHistory;
-      this.setState({priceHistory:priceHistoryOption})
-    })
-    .catch((err)=>{
-      console.log(err);
-    });
-
   }
   collapse(){
     this.setState({"collapse":!this.state.collapse})
@@ -244,6 +251,19 @@ class Market extends Component {
           </Row>
         </Menu.Item>);
     })
+    const priceHistoryChart=this.state.priceHistory==null
+                          ?(<div/>)
+                          :(<ReactEcharts
+                            ReactEcharts
+                            style={{width:'100%',height:230}}
+                            option={this.state.priceHistory}
+                            notMerge={true}
+                            lazyUpdate={true}
+                            theme={"theme_name"}
+                            onChartReady={this.onChartReadyCallback}
+                            onEvents={null}
+                            opts={null}/>)
+
 
     const nodes=orders[this.state.orderType].nodes.map((o)=>{return (nodeGen[o.type](o.ref))});
     const placeOrder=nodeLayout(nodes);
@@ -270,7 +290,7 @@ class Market extends Component {
             theme="dark"
             style={{height: 'calc(100% - 36px - 48px - 1px)',width:'100%'}}
             defaultSelectedKeys={['AAPL']}
-            onSelect={({item,key,selectedKey})=>{this.setState({symbol:key})}}
+            onSelect={({item,key,selectedKey})=>this.handleSelect({item,key,selectedKey})}
             mode="inline"
             >
               {MenuItems}
@@ -325,17 +345,8 @@ class Market extends Component {
             </Card>
           </Col>
           <Col span={12}>
-            <Card bodyStyle={{padding:0}}>
-              <ReactEcharts
-              ReactEcharts
-              style={{width:'100%',height:230}}
-              option={this.state.priceHistory}
-              notMerge={true}
-              lazyUpdate={true}
-              theme={"theme_name"}
-              onChartReady={this.onChartReadyCallback}
-              onEvents={null}
-              opts={null}/>
+            <Card bodyStyle={{padding:0,height:230}}>
+              {priceHistoryChart}
             </Card>
             <Card style={{marginTop:24}}>
               <Row>
