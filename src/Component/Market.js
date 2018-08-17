@@ -15,52 +15,52 @@ const { Content,Sider } = Layout;
 const ButtonGroup = Button.Group;
 const { priceHistory } = data;
 
-const symbols=["AAPL","C","GS","BIDU","WMT","SNE","DDAIF","VLKAY","GE","TSLA"];
+// const symbols=["AAPL","C","GS","BIDU","WMT","SNE","DDAIF","VLKAY","GE","TSLA"];
 
-Mock.mock(api.getLevelOne,{
-  "market|10":[
-    {
-      "symbol|+1":symbols,
-      "bidQty|1-50":1,
-      "bidPrice|100-200.2":1,
-      "askPrice|100-200.2":1,
-      "askQty|1-50":1
-    }
-  ]
-});
+// Mock.mock(api.getLevelOne,{
+//   "market|10":[
+//     {
+//       "symbol|+1":symbols,
+//       "bidQty|1-50":1,
+//       "bidPrice|100-200.2":1,
+//       "askPrice|100-200.2":1,
+//       "askQty|1-50":1
+//     }
+//   ]
+// });
 
-Mock.mock(api.getLevelTwo+"?symbol=AAPL", {
-  "bid|10-30":[
-    {
-      "key|+1":0,
-      "bidPrice|100-200.2":1,
-      "bidQty|1-50":1,
-    }
-  ],
-  "ask|10-30":[
-    {
-      "key|+1":0,
-      "askPrice|100-200.2":1,
-      "askQty|1-50":1,
-    }
-  ]
-});
+// Mock.mock(api.getLevelTwo+"?symbol=AAPL", {
+//   "bid|10-30":[
+//     {
+//       "key|+1":0,
+//       "bidPrice|100-200.2":1,
+//       "bidQty|1-50":1,
+//     }
+//   ],
+//   "ask|10-30":[
+//     {
+//       "key|+1":0,
+//       "askPrice|100-200.2":1,
+//       "askQty|1-50":1,
+//     }
+//   ]
+// });
 
 
-Mock.mock(api.postBid,{
-  "result":{
-    "status|1":["success","fail"],
-    "info|1":["error network","no permittion"]
-  }
-})
-Mock.mock(api.postAsk,{
-  "result":{
-    "status|1":["success","fail"],
-    "info|1":["error network","no permittion"]
-  }
-})
+// Mock.mock(api.postBid,{
+//   "result":{
+//     "status|1":["success","fail"],
+//     "info|1":["error network","no permittion"]
+//   }
+// })
+// Mock.mock(api.postAsk,{
+//   "result":{
+//     "status|1":["success","fail"],
+//     "info|1":["error network","no permittion"]
+//   }
+// })
 
-Mock.mock(api.getPriceHistory+"?symbol=AAPL",priceHistory);
+// Mock.mock(api.getPriceHistory+"?symbol=AAPL",priceHistory);
 
 const nodeGen={
       input:(ref)=>{
@@ -304,7 +304,7 @@ class Market extends Component {
               <Row gutter={12}>
                 <Col span={12}>
                 <Table 
-                pagination={{pageSize:10,simple:true}}
+                pagination={{pageSize:15,simple:true}}
                 size="middle" 
                 dataSource={this.state.bid} >
                   <Column
@@ -314,7 +314,7 @@ class Market extends Component {
                   />
                   <Column
                   className="BidPrice"
-                  title="BidPrice"
+                  title="Bid Price"
                   dataIndex="bidPrice"
                   key="bidPrice"
                   />
@@ -322,7 +322,7 @@ class Market extends Component {
                 </Col>
                 <Col span={12}>
                 <Table 
-                pagination={{pageSize:10,simple:true}}
+                pagination={{pageSize:15,simple:true}}
                 size="middle" 
                 dataSource={this.state.ask} >
                   <Column

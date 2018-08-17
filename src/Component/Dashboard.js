@@ -16,7 +16,7 @@ import './Dashboard.css'
 
 const {Content} = Layout;
 
-Mock.mock(api.getDashboard/*+"?hash="+md5(2)*/,data);1
+// Mock.mock(api.getDashboard/*+"?hash="+md5(2)*/,data);1
 
 class DashBoard extends Component {
   constructor(props){
@@ -38,8 +38,8 @@ class DashBoard extends Component {
   componentWillUnmount(){
   }
   once(){
-    // axios.get(api.getDashboard,{params:{hash:this.props.store.getState().hash}})
-    axios.get(api.getDashboard/*,{params:{hash:this.props.store.getState().hash}}*/)
+    axios.get(api.getDashboard,{params:{hash:this.props.store.getState().hash}})
+    // axios.get(api.getDashboard/*,{params:{hash:this.props.store.getState().hash}}*/)
     .then((res)=>{
       const scatterOption=options.scatter;
       scatterOption['legend']['data']=Object.keys(res.data.scatter);
@@ -104,18 +104,18 @@ class DashBoard extends Component {
                 <ChartCard className="DashboardCard" style={{height:180}} title={<strong>Bid today</strong>} align="left"
                 total={() => (<span dangerouslySetInnerHTML={{ __html: this.state.bidOrderIndex.today }} />)}
                 footer={<Field label="Total" value={this.state.bidOrderIndex.total} />} contentHeight={46}>
-                <MiniBar color="#cceafe"height={45} data={this.state.bidOrderIndex.history} />
+                <MiniArea line color="#cceafe"height={45} data={this.state.bidOrderIndex.history} />
                 </ChartCard>
               </Col>
               <Col span={6}>
                <ChartCard className="DashboardCard" style={{height:180}} title={<strong>Ask today</strong>} align="left"
                 total={() => (<span dangerouslySetInnerHTML={{ __html: this.state.askOrderIndex.today }} />)}
                 footer={<Field label="Total" value={this.state.askOrderIndex.total} />} contentHeight={46}>
-                <MiniBar color="#cceafe"height={45} data={this.state.askOrderIndex.history} />
+                <MiniArea line color="#cceafe"height={45} data={this.state.askOrderIndex.history} />
                 </ChartCard>
               </Col>
               <Col span={6}>
-                <ChartCard className="DashboardCard" style={{height:180}} title={<strong>Completed today</strong>} align="left"
+                <ChartCard line className="DashboardCard" style={{height:180}} title={<strong>Completed today</strong>} align="left"
                 total={() => (<span dangerouslySetInnerHTML={{ __html: this.state.completedOrderIndex.today }} />)}
                 footer={<Field label="Total" value={this.state.completedOrderIndex.total} />} contentHeight={46}>
                 <MiniArea line color="#cceafe"height={45} data={this.state.completedOrderIndex.history} />
@@ -151,11 +151,12 @@ class DashBoard extends Component {
                   <Pie
                       hasLegend
                       title="Completed"
+                      padding={0}
                       subTitle="Amount of money"
                       total={() => (
                         <span
                           dangerouslySetInnerHTML={{
-                            __html: (this.state.symbolProportion.reduce((pre, now) => now.y + pre, 0))
+                            __html: (this.state.symbolProportion.reduce((pre, now) => now.y + pre, 0).toFixed(2))
                           }}
                         />
                       )}

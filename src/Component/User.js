@@ -10,33 +10,33 @@ const {Content} = Layout;
 const {Column}=Table;
 const FormItem = Form.Item;
 
-const symbols=["AAPL","C","GS","BIDU","WMT","SNE","DDAIF","VLKAY","GE","TSLA"];
+// const symbols=["AAPL","C","GS","BIDU","WMT","SNE","DDAIF","VLKAY","GE","TSLA"];
 
-Mock.mock(api.postSignIn,{
-  "hash":md5("admin"+"12345")
-});
+// Mock.mock(api.postSignIn,{
+//   "hash":md5("admin"+"12345")
+// });
 
-Mock.mock(api.postCancel,{
-  "result":{
-    "status|1":["success","failed"],
-    "info|1":["error network","no permittion"]
-  }
-});
+// Mock.mock(api.postCancel,{
+//   "result":{
+//     "status|1":["success","failed"],
+//     "info|1":["error network","no permittion"]
+//   }
+// });
 
-Mock.mock(api.getOrders+"?hash="+md5("admin"+"12345"),{
-  "orders|20-50":[
-    {
-      "key|+1":1,
-      "symbol|1":symbols,
-      "orderType|1":["MKT","LMT","STP","STPL","STPLMT","MIT","LIT"],
-      "action|1":["Buy","Sell"],
-      "price|100-200.2":1,
-      "quantity|1-50":1,
-      "status|1":["Processing","Canceled","Completed"],
-      "datetime":"@date('yyyy-MM-dd')"
-    }
-  ]
-});
+// Mock.mock(api.getOrders+"?hash="+md5("admin"+"12345"),{
+//   "orders|20-50":[
+//     {
+//       "key|+1":1,
+//       "symbol|1":symbols,
+//       "orderType|1":["MKT","LMT","STP","STPL","STPLMT","MIT","LIT"],
+//       "action|1":["Buy","Sell"],
+//       "price|100-200.2":1,
+//       "quantity|1-50":1,
+//       "status|1":["Processing","Canceled","Completed"],
+//       "datetime":"@date('yyyy-MM-dd')"
+//     }
+//   ]
+// });
 
 const links = [{
   key: 'Help',
@@ -196,12 +196,6 @@ class User extends Component {
                   key="operation"
                   render={(text, record) => (
                 <span>
-                  <a 
-                  href="javascript:;" 
-                  onClick={()=>{this.viewOrder(record.key)}}>
-                    View
-                  </a>
-                <Divider type="vertical" style={{display:(record.status=='Processing')?'inline':'none'}}/>
                   <a 
                   href="javascript:;" 
                   style={{display:(record.status=='Processing')?'inline':'none'}}

@@ -3,5 +3,9 @@
 }
 .DashboardCard .antd-pro-charts--pie-legend{
 	height: 200px;
+	text-align: left;
 	overflow: auto;
+}
+.DashboardCard .antd-pro-charts--pie-value{
+	display: none;
 }

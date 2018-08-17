@@ -261,7 +261,7 @@ const options={
             top: '10%',
             dimension: 2,
             min: 0,
-            max: 10000,
+            max: 500000,
             itemWidth: 6,
             itemHeight: 48,
             calculable: true,
